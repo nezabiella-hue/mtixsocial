@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 /**
@@ -208,7 +208,6 @@ function Icon({ name, className = "" }) {
 }
 
 function Segmented({ options, value, onChange }) {
-  // “slider” look: active cyan, inactive dark teal (still clickable)
   return (
     <div className="relative w-full rounded-full border border-white/15 bg-white/10 p-1 backdrop-blur">
       <div className="grid grid-cols-3 gap-1">
@@ -267,7 +266,7 @@ function PillGroup({ options, value, onChange, className = "" }) {
   );
 }
 
-function PosterCard({ item }) {
+function PosterCard({ item, backgroundLocation }) {
   return (
     <div
       className={[
@@ -276,15 +275,13 @@ function PosterCard({ item }) {
         "shadow-[0_20px_60px_rgba(0,0,0,0.35)]",
       ].join(" ")}
     >
-      {/* texture */}
       <div className="absolute inset-0 opacity-95">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.14),transparent_40%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(0,255,255,0.12),transparent_45%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.0),rgba(0,0,0,0.60))]" />
       </div>
 
-      {/* title */}
-      <div className="absolute left-5 top-6 right-5">
+      <div className="absolute left-5 right-5 top-6">
         <div className="whitespace-pre-line text-[30px] font-black leading-[0.95] tracking-tight text-white drop-shadow">
           {item.title.toUpperCase()}
         </div>
@@ -293,15 +290,15 @@ function PosterCard({ item }) {
         </div>
       </div>
 
-      {/* buy */}
+      {/* keep MoviePreview as modal */}
       <Link
         to={`/movie/${item.id}`}
+        state={{ backgroundLocation }}
         className="absolute right-5 top-5 rounded-full bg-white/85 px-4 py-2 text-xs font-bold text-slate-900 shadow-sm transition hover:bg-white active:scale-[0.99]"
       >
         View Details
       </Link>
 
-      {/* bottom chip */}
       <div className="absolute bottom-4 left-4 rounded-full bg-black/35 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur">
         Featured • Poster {item.id}
       </div>
@@ -310,6 +307,8 @@ function PosterCard({ item }) {
 }
 
 export default function TrendsHome() {
+  const location = useLocation();
+
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("Today");
 
@@ -326,13 +325,11 @@ export default function TrendsHome() {
     return expanded ? base : base.slice(0, 3);
   }, [expanded]);
 
-  // ✅ NOT a slider: one pill cycles text
   const cyclePeriod = () => {
     const idx = PERIODS.indexOf(period);
     setPeriod(PERIODS[(idx + 1) % PERIODS.length]);
   };
 
-  // carousel auto-advance
   useEffect(() => {
     timerRef.current = window.setInterval(() => {
       setSlide((s) => (s + 1) % posters.length);
@@ -351,9 +348,7 @@ export default function TrendsHome() {
 
   return (
     <main className="min-h-dvh bg-[linear-gradient(-25deg,#000000,#134e4a)] text-white">
-      {/* container: mobile -> tablet */}
       <div className="mx-auto max-w-[520px] px-4 pb-28 pt-5 md:max-w-[760px] md:px-6">
-        {/* Top row: back + search */}
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -377,7 +372,7 @@ export default function TrendsHome() {
           </div>
         </div>
 
-        {/* Carousel */}
+        {/* Carousel (HORIZONTAL) */}
         <div className="mt-4">
           <div className="relative">
             <div className="overflow-hidden rounded-3xl">
@@ -389,13 +384,12 @@ export default function TrendsHome() {
               >
                 {posters.map((p) => (
                   <div key={p.id} className="w-full shrink-0">
-                    <PosterCard item={p} />
+                    <PosterCard item={p} backgroundLocation={location} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* dots */}
             <div className="mt-3 flex items-center justify-center gap-2">
               {posters.map((_, i) => (
                 <button
@@ -413,9 +407,7 @@ export default function TrendsHome() {
           </div>
         </div>
 
-        {/* ✅ Trending bar (NOT a slider) */}
         <div className="mt-5 relative flex items-center justify-between">
-          {/* left icons */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -434,11 +426,9 @@ export default function TrendsHome() {
             </button>
           </div>
 
-          {/* center pinned */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
             <div className="text-lg font-extrabold leading-none">Trending</div>
 
-            {/* ONE pill that cycles */}
             <button
               type="button"
               onClick={cyclePeriod}
@@ -450,11 +440,9 @@ export default function TrendsHome() {
             </button>
           </div>
 
-          {/* right spacer */}
           <div className="w-[80px]" />
         </div>
 
-        {/* Top filter slider (keep slider style) */}
         <div className="mt-5">
           <Segmented
             options={TOP_FILTERS}
@@ -463,7 +451,6 @@ export default function TrendsHome() {
           />
         </div>
 
-        {/* Top watched list */}
         <div className="mt-5 rounded-3xl border border-white/10 bg-black/20 p-4 backdrop-blur">
           <div className="text-sm font-bold text-white/80">Top watched</div>
 
@@ -505,7 +492,6 @@ export default function TrendsHome() {
           </div>
         </div>
 
-        {/* Feed filter pills */}
         <div className="mt-5">
           <PillGroup
             options={FEED_FILTERS}
@@ -514,7 +500,6 @@ export default function TrendsHome() {
           />
         </div>
 
-        {/* Dummy feed placeholder */}
         <div className="mt-4 space-y-3">
           {[1, 2, 3].map((i) => (
             <div
@@ -536,7 +521,6 @@ export default function TrendsHome() {
         </div>
       </div>
 
-      {/* Bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-50">
         <div className="mx-auto max-w-[520px] px-4 pb-4 md:max-w-[760px] md:px-6">
           <div className="relative rounded-[28px] border border-white/10 bg-black/35 px-6 py-4 backdrop-blur">
@@ -549,18 +533,11 @@ export default function TrendsHome() {
                 <Icon name="user" className="h-5 w-5" />
               </button>
 
-              {/* big center create button (go to MakeATake) */}
+              {/* ✅ MakeATake should be a FULL PAGE (no modal state) */}
               <Link
                 to="/makeatake"
                 className="relative -mt-10 grid h-16 w-16 place-items-center rounded-full bg-[linear-gradient(-25deg,#a5f3fc,#22d3ee)] text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.45)] transition active:scale-95"
                 aria-label="Make a take"
-                onClick={() => {
-                  const el = document.getElementById("root");
-                  if (el) el.style.transform = "scale(0.999)";
-                  setTimeout(() => {
-                    if (el) el.style.transform = "";
-                  }, 120);
-                }}
               >
                 <Icon name="clapperPlus" className="h-7 w-7" />
               </Link>
@@ -574,7 +551,6 @@ export default function TrendsHome() {
               </button>
             </div>
 
-            {/* safe area spacer */}
             <div className="h-[env(safe-area-inset-bottom)]" />
           </div>
         </div>

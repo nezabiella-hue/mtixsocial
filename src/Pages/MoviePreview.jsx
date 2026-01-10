@@ -77,7 +77,7 @@ export default function MoviePreview() {
   const [synExpanded, setSynExpanded] = useState(false);
   const [kmFilter, setKmFilter] = useState(5);
 
-  // NEW: video only sticky after play
+  // video only sticky after play
   const [isPlaying, setIsPlaying] = useState(false);
 
   const videoId = useMemo(() => getYouTubeId(MOVIE.trailerUrl), []);
@@ -91,29 +91,31 @@ export default function MoviePreview() {
     return MOVIE.theaters.filter((t) => t.distanceKm <= kmFilter);
   }, [kmFilter]);
 
-  const close = () => navigate(-1);
+  const close = () => {
+    if (window.history.length > 1) navigate(-1);
+    else navigate("/", { replace: true });
+  };
 
   return (
     <div className="fixed inset-0 z-[999]">
-      {/* Overlay behind sheet (LESS DARK) */}
-      {/* Adjust darkness here: bg-black/35, /40, /50 etc */}
+      {/* Overlay behind sheet (LESS DARK)
+          Adjust darkness here: bg-black/25, /30, /35, /40, /50 */}
       <button
         type="button"
         onClick={close}
-        className="absolute inset-0 bg-black/35"
+        className="absolute inset-0 bg-black/30"
         aria-label="Close movie preview"
       />
 
-      {/* bottom sheet */}
+      {/* bottom sheet: anchored to bottom + slides up */}
       <section
         role="dialog"
         aria-modal="true"
-        className="
-          absolute left-1/2 top-[6%] w-[min(560px,92vw)] -translate-x-1/2
-          rounded-[28px] border border-white/10 bg-[#0E2A25]/95 shadow-2xl
-          overflow-hidden
-          animate-[sheetIn_.22s_ease-out]
-        "
+        className={[
+          "absolute left-1/2 bottom-4 w-[min(560px,92vw)] -translate-x-1/2",
+          "rounded-[28px] border border-white/10 bg-[#0E2A25]/95 shadow-2xl overflow-hidden",
+          "animate-[sheetUp_.28s_cubic-bezier(.2,.9,.2,1)]",
+        ].join(" ")}
       >
         {/* handle + close */}
         <div className="relative flex items-center justify-center py-3">
@@ -240,9 +242,10 @@ export default function MoviePreview() {
               </div>
 
               <p
-                className={`text-[14px] leading-relaxed text-white/80 ${
-                  synExpanded ? "" : "line-clamp-3"
-                }`}
+                className={[
+                  "text-[14px] leading-relaxed text-white/80",
+                  synExpanded ? "" : "line-clamp-3",
+                ].join(" ")}
               >
                 {MOVIE.synopsis}
               </p>
@@ -329,10 +332,11 @@ export default function MoviePreview() {
         </div>
       </section>
 
+      {/* keyframes */}
       <style>{`
-        @keyframes sheetIn {
-          from { transform: translate(-50%, 24px); opacity: .4; }
-          to { transform: translate(-50%, 0); opacity: 1; }
+        @keyframes sheetUp {
+          from { transform: translate(100%, 56px); opacity: .4; }
+          to   { transform: translate(0%, 0); opacity: 1; }
         }
       `}</style>
     </div>
