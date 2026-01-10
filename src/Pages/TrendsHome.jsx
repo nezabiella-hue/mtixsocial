@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 /**
@@ -293,12 +294,12 @@ function PosterCard({ item }) {
       </div>
 
       {/* buy */}
-      <button
-        type="button"
+      <Link
+        to={`/movie/${item.id}`}
         className="absolute right-5 top-5 rounded-full bg-white/85 px-4 py-2 text-xs font-bold text-slate-900 shadow-sm transition hover:bg-white active:scale-[0.99]"
       >
-        Buy Ticket
-      </button>
+        View Details
+      </Link>
 
       {/* bottom chip */}
       <div className="absolute bottom-4 left-4 rounded-full bg-black/35 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur">
@@ -548,9 +549,9 @@ export default function TrendsHome() {
                 <Icon name="user" className="h-5 w-5" />
               </button>
 
-              {/* big center create button */}
-              <button
-                type="button"
+              {/* big center create button (go to MakeATake) */}
+              <Link
+                to="/makeatake"
                 className="relative -mt-10 grid h-16 w-16 place-items-center rounded-full bg-[linear-gradient(-25deg,#a5f3fc,#22d3ee)] text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.45)] transition active:scale-95"
                 aria-label="Make a take"
                 onClick={() => {
@@ -562,7 +563,7 @@ export default function TrendsHome() {
                 }}
               >
                 <Icon name="clapperPlus" className="h-7 w-7" />
-              </button>
+              </Link>
 
               <button
                 type="button"

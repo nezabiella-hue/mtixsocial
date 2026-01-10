@@ -1,18 +1,16 @@
 import "./App.css";
+import { Outlet } from "react-router-dom";
 import AppFrame from "./Layouts/AppFrame";
-import TrendsHome from "./Pages/TrendsHome";
 
-function App() {
+export default function App() {
   return (
     <AppFrame>
-      <main className="min-h-dvh bg-[linear-gradient(-25deg,#134e4a,#000000)]">
-        <TrendsHome />
+      <main className="relative min-h-dvh bg-[linear-gradient(-25deg,#134e4a,#000000)]">
+        <Outlet />
       </main>
     </AppFrame>
   );
 }
-
-export default App;
 /* ---------------------------------------------------- */
 /*                       NOTES                          */
 /* ---------------------------------------------------- */
