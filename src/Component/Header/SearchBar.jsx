@@ -10,10 +10,11 @@ export default function SearchBar({
     <div className={["relative w-full", className].join(" ")}>
       <SearchIcon
         className="
-          pointer-events-none absolute left-3 top-1/2
-          h-4 w-4 -translate-y-1/2
-          text-white
-        "
+    pointer-events-none absolute left-3 top-1/2
+    h-4 w-4 -translate-y-1/2
+    text-white
+    z-10
+  "
       />
 
       <input

@@ -21,12 +21,12 @@ const DEMO_POSTERS = [
     subtitle: "Multiverse chaos, but wholesome.",
   },
   {
-    id: "demon",
+    id: "demon-slayer-mugen-train",
     title: "Demon Slayer:\nKimetsu no Yaiba",
     subtitle: "Breath styles + hype fights.",
   },
   {
-    id: "sore",
+    id: "sore-istri-dari-masa-depan",
     title: "Sore:\nIstri dari Masa Depan",
     subtitle: "Romance meets time-bending.",
   },

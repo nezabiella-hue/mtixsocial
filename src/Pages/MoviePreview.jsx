@@ -1,33 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-// PoC data (later replace with MOVIES lookup)
-const MOVIE = {
-  id: "everything-everywhere",
-  title: "Everything Everywhere All at Once",
-  genres: ["Action", "Sci-Fi", "Adventure"],
-  duration: "2h 50m",
-  ageRating: "R13",
-  reviews: 125,
-  watched: "9.999",
-  trailerUrl: "https://www.youtube.com/watch?v=wxN1T1uxQ2g",
-  synopsis:
-    "A Chinese immigrant gets unwillingly embroiled in an epic adventure where she must connect different versions of herself in the parallel universe... (longer text) Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-  theaters: [
-    { name: "Gandaria City XXI", distanceKm: 1.5 },
-    { name: "Kota Kasablanka XXI", distanceKm: 2.2 },
-    { name: "Plaza Senayan XXI", distanceKm: 4.8 },
-    { name: "Pondok Indah Mall XXI", distanceKm: 5.5 },
-    { name: "Ciputra World XXI", distanceKm: 7.0 },
-  ],
-  cast: [
-    { name: "Michelle Yeoh", img: "https://i.pravatar.cc/80?img=32" },
-    { name: "Ke Huy Quan", img: "https://i.pravatar.cc/80?img=12" },
-    { name: "Stephanie Hsu", img: "https://i.pravatar.cc/80?img=5" },
-    { name: "Jamie Lee Curtis", img: "https://i.pravatar.cc/80?img=45" },
-    { name: "Harry Shum Jr.", img: "https://i.pravatar.cc/80?img=18" },
-  ],
-};
+import { getMoviePreviewData } from "../Data/selector-movie.js";
 
 function getYouTubeId(url) {
   try {
@@ -72,7 +46,9 @@ function Stars({ value = 4 }) {
 
 export default function MoviePreview() {
   const navigate = useNavigate();
-  const { id } = useParams(); // ready for later: use id to fetch movie data
+  const { id } = useParams();
+
+  const MOVIE = useMemo(() => getMoviePreviewData(id), [id]);
 
   const [synExpanded, setSynExpanded] = useState(false);
   const [kmFilter, setKmFilter] = useState(5);
@@ -80,26 +56,57 @@ export default function MoviePreview() {
   // video only sticky after play
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const videoId = useMemo(() => getYouTubeId(MOVIE.trailerUrl), []);
+  // reset per movie
+  useEffect(() => {
+    setSynExpanded(false);
+    setKmFilter(5);
+    setIsPlaying(false);
+  }, [id]);
+
+  const videoId = useMemo(
+    () => getYouTubeId(MOVIE?.trailerUrl || ""),
+    [MOVIE?.trailerUrl]
+  );
+
   const embedUrl = useMemo(() => {
     if (!videoId) return null;
-    // autoplay only after user presses play
     return `https://www.youtube.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
   }, [videoId]);
 
   const filteredTheaters = useMemo(() => {
+    if (!MOVIE) return [];
     return MOVIE.theaters.filter((t) => t.distanceKm <= kmFilter);
-  }, [kmFilter]);
+  }, [MOVIE, kmFilter]);
 
   const close = () => {
     if (window.history.length > 1) navigate(-1);
     else navigate("/", { replace: true });
   };
 
+  // handle invalid id
+  if (!MOVIE) {
+    return (
+      <div className="fixed inset-0 z-999 grid place-items-center bg-black/60 text-white">
+        <div className="w-[min(560px,92vw)] rounded-[28px] border border-white/10 bg-[#0E2A25]/95 p-6 text-center shadow-2xl">
+          <div className="text-lg font-extrabold">Movie not found</div>
+          <div className="mt-2 text-sm text-white/70">
+            No data for id:{" "}
+            <span className="font-mono text-white/90">{String(id)}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/", { replace: true })}
+            className="mt-5 rounded-full bg-white/10 px-5 py-2 text-sm font-semibold text-white/90 hover:bg-white/15"
+          >
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-[999]">
-      {/* Overlay behind sheet (LESS DARK)
-          Adjust darkness here: bg-black/25, /30, /35, /40, /50 */}
+    <div className="fixed inset-0 z-999">
       <button
         type="button"
         onClick={close}
@@ -107,7 +114,6 @@ export default function MoviePreview() {
         aria-label="Close movie preview"
       />
 
-      {/* bottom sheet: anchored to bottom + slides up */}
       <section
         role="dialog"
         aria-modal="true"
@@ -117,7 +123,6 @@ export default function MoviePreview() {
           "animate-[sheetUp_.28s_cubic-bezier(.2,.9,.2,1)]",
         ].join(" ")}
       >
-        {/* handle + close */}
         <div className="relative flex items-center justify-center py-3">
           <div className="h-1 w-10 rounded-full bg-white/20" />
           <button
@@ -130,9 +135,7 @@ export default function MoviePreview() {
           </button>
         </div>
 
-        {/* scroll container */}
         <div className="max-h-[86vh] overflow-y-auto">
-          {/* Trailer: becomes sticky ONLY after play */}
           <div
             className={
               isPlaying ? "sticky top-0 z-10 bg-[#0E2A25]/95 backdrop-blur" : ""
@@ -151,7 +154,6 @@ export default function MoviePreview() {
                   </a>
                 ) : !isPlaying ? (
                   <>
-                    {/* thumbnail preview */}
                     <img
                       src={ytThumb(videoId)}
                       alt="Trailer preview"
@@ -159,10 +161,8 @@ export default function MoviePreview() {
                       loading="lazy"
                     />
 
-                    {/* gradient for contrast */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-black/25" />
 
-                    {/* play button */}
                     <button
                       type="button"
                       onClick={() => setIsPlaying(true)}
@@ -174,7 +174,6 @@ export default function MoviePreview() {
                       </div>
                     </button>
 
-                    {/* hint */}
                     <div className="absolute bottom-3 left-3 rounded-full bg-black/40 px-3 py-1 text-xs text-white/80 backdrop-blur">
                       Tap to play • Trailer
                     </div>
@@ -182,7 +181,7 @@ export default function MoviePreview() {
                 ) : (
                   <iframe
                     className="h-full w-full"
-                    src={embedUrl}
+                    src={embedUrl || undefined}
                     title="Movie trailer"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
@@ -192,7 +191,6 @@ export default function MoviePreview() {
             </div>
           </div>
 
-          {/* content */}
           <div className="px-5 pb-28 pt-2 text-white">
             <h1 className="text-[22px] font-extrabold leading-tight sm:text-[24px]">
               {MOVIE.title}
@@ -216,19 +214,18 @@ export default function MoviePreview() {
             </div>
 
             <div className="mt-4 grid gap-1">
-              <Stars value={4} />
+              <Stars value={MOVIE.ratingStars ?? 4} />
               <div className="text-[13px] text-white/70">
                 {MOVIE.reviews} reviews
               </div>
               <div className="text-[13px] text-white/70">
                 <span className="font-semibold text-white/90">
-                  {MOVIE.watched}
+                  {MOVIE.watchedLabel}
                 </span>{" "}
                 Watched
               </div>
             </div>
 
-            {/* Synopsis */}
             <div className="mt-7">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-[18px] font-bold">Synopsis</h2>
@@ -251,7 +248,6 @@ export default function MoviePreview() {
               </p>
             </div>
 
-            {/* Nearby theaters */}
             <div className="mt-8">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-[18px] font-bold">Nearby theaters</h2>
@@ -291,7 +287,6 @@ export default function MoviePreview() {
               </div>
             </div>
 
-            {/* Cast & Crew */}
             <div className="mt-8">
               <div className="mb-3 flex items-center justify-between">
                 <h2 className="text-[18px] font-bold">Cast & Crew</h2>
@@ -318,7 +313,6 @@ export default function MoviePreview() {
             </div>
           </div>
 
-          {/* Sticky bottom CTA */}
           <div className="sticky bottom-0 z-10 bg-[#0E2A25]/95 backdrop-blur">
             <div className="px-5 pb-5 pt-3">
               <button
@@ -332,7 +326,6 @@ export default function MoviePreview() {
         </div>
       </section>
 
-      {/* keyframes */}
       <style>{`
         @keyframes sheetUp {
           from { transform: translate(100%, 56px); opacity: .4; }
