@@ -1,6 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import BackButton from "../Component/Buttons/BackButton";
+import SearchBar from "../Component/Header/SearchBar";
+
 /**
  * TrendsHome.jsx
  * Dummy visual page for routing + layout validation (mobile -> tablet)
@@ -350,25 +353,11 @@ export default function TrendsHome() {
     <main className="min-h-dvh bg-[linear-gradient(-25deg,#000000,#134e4a)] text-white">
       <div className="mx-auto max-w-[520px] px-4 pb-28 pt-5 md:max-w-[760px] md:px-6">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
-            className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white/90 backdrop-blur transition hover:bg-white/15 active:scale-[0.98]"
-            aria-label="Back"
-          >
-            <Icon name="back" className="h-5 w-5" />
-          </button>
+          <BackButton />
 
-          <div className="relative flex-1">
-            <Icon
-              name="search"
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/60"
-            />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
-              className="h-10 w-full rounded-full border border-white/15 bg-white/10 pl-10 pr-4 text-sm text-white placeholder:text-white/55 outline-none backdrop-blur transition focus:border-white/25 focus:bg-white/15"
-            />
+          {/* Search bar expands cleanly on phone & tablet */}
+          <div className="min-w-0 flex-1">
+            <SearchBar value={query} onChange={setQuery} />
           </div>
         </div>
 

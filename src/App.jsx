@@ -13,7 +13,7 @@ export default function App() {
 
   return (
     <AppFrame>
-      <main className="relative min-h-dvh bg-[linear-gradient(-25deg,#134e4a,#000000)]">
+      <main className="relative min-h-dvh bg-app">
         {/* normal pages */}
         <Routes location={backgroundLocation || location}>
           <Route path="/" element={<TrendsHome />} />
