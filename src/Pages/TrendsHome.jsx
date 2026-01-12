@@ -1,9 +1,10 @@
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useMemo, useState } from "react";
 
 import BackButton from "../Component/Buttons/BackButton";
 import SearchBar from "../Component/Header/SearchBar";
 import HeroCarousel from "../Component/Header/HeroCarousel";
+import Navbar from "../Component/UI/Navbar";
 
 const PERIODS = ["Today", "This Week", "This Month"];
 const TOP_FILTERS = ["Takes", "Movies", "Reviews"];
@@ -89,68 +90,6 @@ function Icon({ name, className = "" }) {
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-          />
-        </svg>
-      );
-    case "user":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 12a4.5 4.5 0 1 0-4.5-4.5A4.5 4.5 0 0 0 12 12Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-          />
-          <path
-            d="M4 20c1.7-4 14.3-4 16 0"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-    case "mail":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M4.5 6.5h15A2 2 0 0 1 21.5 8.5v9A2 2 0 0 1 19.5 19.5h-15A2 2 0 0 1 2.5 17.5v-9A2 2 0 0 1 4.5 6.5Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M3.5 8.2 12 13.2l8.5-5"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
-    case "clapperPlus":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M5 9h14v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5 9 7 4h14l-2 5H5Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M12 13v6"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-          <path
-            d="M9 16h6"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
           />
         </svg>
       );
@@ -241,7 +180,6 @@ export default function TrendsHome() {
       <div className="mx-auto max-w-[520px] px-4 pb-28 pt-5 md:max-w-[760px] md:px-6">
         <div className="flex items-center gap-3">
           <BackButton />
-
           <div className="min-w-0 flex-1">
             <SearchBar value={query} onChange={setQuery} />
           </div>
@@ -365,39 +303,11 @@ export default function TrendsHome() {
         </div>
       </div>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50">
-        <div className="mx-auto max-w-[520px] px-4 pb-4 md:max-w-[760px] md:px-6">
-          <div className="relative rounded-[28px] border border-white/10 bg-black/35 px-6 py-4 backdrop-blur">
-            <div className="flex items-center justify-between">
-              <button
-                type="button"
-                className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white/85 transition hover:bg-white/15 active:scale-[0.98]"
-                aria-label="Profile"
-              >
-                <Icon name="user" className="h-5 w-5" />
-              </button>
-
-              <Link
-                to="/makeatake"
-                className="relative -mt-10 grid h-16 w-16 place-items-center rounded-full bg-[linear-gradient(-25deg,#a5f3fc,#22d3ee)] text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.45)] transition active:scale-95"
-                aria-label="Make a take"
-              >
-                <Icon name="clapperPlus" className="h-7 w-7" />
-              </Link>
-
-              <button
-                type="button"
-                className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 text-white/85 transition hover:bg-white/15 active:scale-[0.98]"
-                aria-label="Messages"
-              >
-                <Icon name="mail" className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="h-[env(safe-area-inset-bottom)]" />
-          </div>
-        </div>
-      </nav>
+      <Navbar
+        onProfileClick={() => console.log("profile")}
+        onMessageClick={() => console.log("messages")}
+        makeATakeTo="/makeatake"
+      />
     </main>
   );
 }

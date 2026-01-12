@@ -2,22 +2,33 @@
 
 /* ===== Theme tokens (Tailwind v4) ===== */
 @theme {
-  /* ===== MTIX Glass Header ===== */
+  /* ===== Base ===== */
   --color-white: #ffffff;
-
-  /* soft white / glass fill */
   --color-darkwhite: #dce6de;
 
-  /* green tint family */
-  --color-green-soft: #5f8f86; /* pill / UI green */
-  --color-green-deep: #134e4a; /* background gradient */
+  /* ===== Green system ===== */
+  --color-green-soft: #5f8f86;
+  --color-green-deep: #134e4a;
 
-  /* strokes & borders (derived, not new colors) */
+  /* ===== CTA gradient system ===== */
+  --color-cta-start: #184d49;
+  --color-cta-end: #a89a73;
+
+  /* ===== Strokes ===== */
   --color-stroke-soft: rgba(220, 230, 222, 0.35);
   --color-stroke-focus: rgba(220, 230, 222, 0.55);
 }
 
-/* ===== Custom utilities (Tailwind v4) ===== */
+/* ===== App background ===== */
 @utility bg-app {
   background: linear-gradient(-25deg, var(--color-green-deep), #000000);
+}
+
+/* ===== CTA gradient (same logic, different colors) ===== */
+@utility bg-cta {
+  background: linear-gradient(
+    -139deg,
+    var(--color-cta-start),
+    var(--color-cta-end)
+  );
 }
