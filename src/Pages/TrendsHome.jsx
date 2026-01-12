@@ -1,36 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
 import BackButton from "../Component/Buttons/BackButton";
 import SearchBar from "../Component/Header/SearchBar";
-
-/**
- * TrendsHome.jsx
- * Dummy visual page for routing + layout validation (mobile -> tablet)
- * Tailwind required.
- */
+import HeroCarousel from "../Component/Header/HeroCarousel";
 
 const PERIODS = ["Today", "This Week", "This Month"];
 const TOP_FILTERS = ["Takes", "Movies", "Reviews"];
 const FEED_FILTERS = ["Following", "Movies", "Group"];
-
-const DEMO_POSTERS = [
-  {
-    id: "eeaao",
-    title: "Everything Everywhere\nAll at Once",
-    subtitle: "Multiverse chaos, but wholesome.",
-  },
-  {
-    id: "demon-slayer-mugen-train",
-    title: "Demon Slayer:\nKimetsu no Yaiba",
-    subtitle: "Breath styles + hype fights.",
-  },
-  {
-    id: "sore-istri-dari-masa-depan",
-    title: "Sore:\nIstri dari Masa Depan",
-    subtitle: "Romance meets time-bending.",
-  },
-];
 
 const DEMO_TOP_MOVIES = [
   { id: "m1", title: "Everything Everywhere All at Once", views: "125.5k" },
@@ -81,34 +58,6 @@ function Icon({ name, className = "" }) {
           />
           <path
             d="M9.6 17.8 14.4 20.2"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-    case "back":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M15 18l-6-6 6-6"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
-    case "search":
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none">
-          <path
-            d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
-            stroke="currentColor"
-            strokeWidth="2.2"
-          />
-          <path
-            d="M16.5 16.5 21 21"
             stroke="currentColor"
             strokeWidth="2.2"
             strokeLinecap="round"
@@ -269,84 +218,22 @@ function PillGroup({ options, value, onChange, className = "" }) {
   );
 }
 
-function PosterCard({ item, backgroundLocation }) {
-  return (
-    <div
-      className={[
-        "relative h-[240px] w-full overflow-hidden rounded-3xl border border-white/10",
-        "bg-[linear-gradient(-25deg,#000000,#134e4a)]",
-        "shadow-[0_20px_60px_rgba(0,0,0,0.35)]",
-      ].join(" ")}
-    >
-      <div className="absolute inset-0 opacity-95">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,255,255,0.14),transparent_40%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_70%,rgba(0,255,255,0.12),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.0),rgba(0,0,0,0.60))]" />
-      </div>
-
-      <div className="absolute left-5 right-5 top-6">
-        <div className="whitespace-pre-line text-[30px] font-black leading-[0.95] tracking-tight text-white drop-shadow">
-          {item.title.toUpperCase()}
-        </div>
-        <div className="mt-3 max-w-[70%] text-xs text-white/70">
-          {item.subtitle}
-        </div>
-      </div>
-
-      {/* keep MoviePreview as modal */}
-      <Link
-        to={`/movie/${item.id}`}
-        state={{ backgroundLocation }}
-        className="absolute right-5 top-5 rounded-full bg-white/85 px-4 py-2 text-xs font-bold text-slate-900 shadow-sm transition hover:bg-white active:scale-[0.99]"
-      >
-        View Details
-      </Link>
-
-      <div className="absolute bottom-4 left-4 rounded-full bg-black/35 px-3 py-2 text-xs font-semibold text-white/80 backdrop-blur">
-        Featured • Poster {item.id}
-      </div>
-    </div>
-  );
-}
-
 export default function TrendsHome() {
   const location = useLocation();
 
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("Today");
-
   const [topFilter, setTopFilter] = useState("Movies");
   const [feedFilter, setFeedFilter] = useState("Movies");
   const [expanded, setExpanded] = useState(false);
 
-  const [slide, setSlide] = useState(0);
-  const timerRef = useRef(null);
-
-  const posters = useMemo(() => DEMO_POSTERS, []);
   const topMovies = useMemo(() => {
-    const base = DEMO_TOP_MOVIES;
-    return expanded ? base : base.slice(0, 3);
+    return expanded ? DEMO_TOP_MOVIES : DEMO_TOP_MOVIES.slice(0, 3);
   }, [expanded]);
 
   const cyclePeriod = () => {
     const idx = PERIODS.indexOf(period);
     setPeriod(PERIODS[(idx + 1) % PERIODS.length]);
-  };
-
-  useEffect(() => {
-    timerRef.current = window.setInterval(() => {
-      setSlide((s) => (s + 1) % posters.length);
-    }, 4200);
-    return () => window.clearInterval(timerRef.current);
-  }, [posters.length]);
-
-  const pauseCarousel = () => {
-    if (timerRef.current) window.clearInterval(timerRef.current);
-  };
-  const resumeCarousel = () => {
-    timerRef.current = window.setInterval(() => {
-      setSlide((s) => (s + 1) % posters.length);
-    }, 4200);
   };
 
   return (
@@ -355,48 +242,16 @@ export default function TrendsHome() {
         <div className="flex items-center gap-3">
           <BackButton />
 
-          {/* Search bar expands cleanly on phone & tablet */}
           <div className="min-w-0 flex-1">
             <SearchBar value={query} onChange={setQuery} />
           </div>
         </div>
 
-        {/* Carousel (HORIZONTAL) */}
         <div className="mt-4">
-          <div className="relative">
-            <div className="overflow-hidden rounded-3xl">
-              <div
-                className="flex transition-transform duration-700 ease-out"
-                style={{ transform: `translateX(-${slide * 100}%)` }}
-                onMouseEnter={pauseCarousel}
-                onMouseLeave={resumeCarousel}
-              >
-                {posters.map((p) => (
-                  <div key={p.id} className="w-full shrink-0">
-                    <PosterCard item={p} backgroundLocation={location} />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-3 flex items-center justify-center gap-2">
-              {posters.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setSlide(i)}
-                  className={[
-                    "h-2 rounded-full transition-all",
-                    i === slide ? "w-7 bg-cyan-200/90" : "w-2 bg-white/25",
-                  ].join(" ")}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
+          <HeroCarousel backgroundLocation={location} />
         </div>
 
-        <div className="mt-5 relative flex items-center justify-between">
+        <div className="relative mt-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -415,7 +270,7 @@ export default function TrendsHome() {
             </button>
           </div>
 
-          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+          <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-3">
             <div className="text-lg font-extrabold leading-none">Trending</div>
 
             <button
@@ -522,7 +377,6 @@ export default function TrendsHome() {
                 <Icon name="user" className="h-5 w-5" />
               </button>
 
-              {/* ✅ MakeATake should be a FULL PAGE (no modal state) */}
               <Link
                 to="/makeatake"
                 className="relative -mt-10 grid h-16 w-16 place-items-center rounded-full bg-[linear-gradient(-25deg,#a5f3fc,#22d3ee)] text-slate-900 shadow-[0_20px_50px_rgba(0,0,0,0.45)] transition active:scale-95"
