@@ -4,7 +4,7 @@ export default function BannerCard({ item, backgroundLocation }) {
   return (
     <div
       className={[
-        "relative h-[240px] w-full overflow-hidden rounded-3xl border border-white/10",
+        "relative h-60 w-full overflow-hidden rounded-3xl border border-white/10",
         "bg-[linear-gradient(-25deg,#000000,#134e4a)]",
         "shadow-[0_20px_60px_rgba(0,0,0,0.35)]",
       ].join(" ")}
