@@ -13,7 +13,7 @@ export default function App() {
 
   return (
     <AppFrame>
-      <main className="relative min-h-dvh bg-app">
+      <main className="relative min-h-dvh bg-transparent">
         {/* normal pages */}
         <Routes location={backgroundLocation || location}>
           <Route path="/" element={<TrendsHome />} />

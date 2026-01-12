@@ -1,14 +1,15 @@
 export default function AppFrame({ children }) {
   return (
     <div className="min-h-dvh bg-neutral-100">
-      {/* Centered app shell */}
       <div
         className={[
-          "mx-auto min-h-dvh w-full bg-white",
-          "max-w-107.5", // iPhone max width
+          "mx-auto min-h-dvh w-full",
+          "bg-app", // ✅ was bg-white
+          "overflow-hidden", // ✅ prevents peeking on rounded corners
+          "max-w-[430px]",
           "md:my-6 md:min-h-[calc(100dvh-3rem)]",
           "md:rounded-[28px] md:border md:border-neutral-200 md:shadow-sm",
-          "lg:max-w-130", // 520px (canonical)
+          "md:max-w-[820px] lg:max-w-[1024px]",
         ].join(" ")}
       >
         {children}

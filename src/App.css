@@ -32,3 +32,14 @@
     var(--color-cta-end)
   );
 }
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: linear-gradient(-25deg, var(--color-green-deep), #000000);
+}
