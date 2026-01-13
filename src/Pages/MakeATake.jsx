@@ -2,8 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MOVIE_TAGS } from "../Data/movies";
 
+// NEW: write into feed-store + shared limit
+import { addUserTake, addUserReview } from "../Data/feed-store";
+import { TAKE_LIMIT } from "../Data/takes-source";
+
 const MODELS = ["Take", "Review"];
-const TAKE_LIMIT = 240;
 
 function Icon({ name, className = "" }) {
   switch (name) {
@@ -143,6 +146,9 @@ function Stars({ value, onChange }) {
   );
 }
 
+const newId = (prefix) =>
+  `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`;
+
 export default function MakeATake() {
   const nav = useNavigate();
 
@@ -180,15 +186,47 @@ export default function MakeATake() {
   const onSend = () => {
     if (!canSend) return;
 
-    const payload = {
-      type: mode.toLowerCase(),
-      movieId: selectedTagId,
-      text: text.trim(),
-      stars: mode === "Review" ? stars : null,
-      createdAt: new Date().toISOString(),
+    const now = Date.now();
+    const me = {
+      authorName: "You",
+      authorHandle: "@you",
+      authorAvatar: "https://i.pravatar.cc/80?img=3",
     };
 
-    console.log("SEND TAKE/REVIEW:", payload);
+    if (mode === "Take") {
+      const takeItem = {
+        id: newId("ut"),
+        kind: "take",
+        movieId: selectedTagId,
+        ...me,
+        text: text.trim().slice(0, TAKE_LIMIT),
+        images: [], // later: wire to image picker
+        createdAt: now,
+        feedTag: "movies", // simple PoC: always show in Movies tab
+        stats: { likes: 0, reposts: 0, comments: 0, views: 0 },
+      };
+
+      addUserTake(takeItem);
+    } else {
+      const reviewItem = {
+        id: newId("ur"),
+        kind: "review",
+        movieId: selectedTagId,
+        ...me,
+        title: `Review: ${selectedTag?.label ?? selectedTagId}`,
+        body: text.trim(),
+        stars,
+        coverImg: null,
+        createdAt: now,
+        feedTag: "movies", // simple PoC: always show in Movies tab
+        stats: { likes: 0, comments: 0, views: 0 },
+      };
+
+      addUserReview(reviewItem);
+    }
+
+    // notify TrendsHome to refresh
+    window.dispatchEvent(new Event("mtix:feed-updated"));
 
     setText("");
     setStars(0);
