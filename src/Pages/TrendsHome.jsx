@@ -1,63 +1,45 @@
 import { useLocation } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import BackButton from "../Component/Buttons/BackButton";
 import SearchBar from "../Component/Header/SearchBar";
 import HeroCarousel from "../Component/Header/HeroCarousel";
 import Navbar from "../Component/UI/Navbar";
 
-// NEW: trending components + selector
+// trending
 import TrendingTab from "../Component/Header/TrendingTab";
 import FilterSwitch from "../Component/Header/FilterSwitch";
 import TrendingRank from "../Component/Header/TrendingRank";
 import { getTrendingList } from "../Data/selector-trending";
 
-const FEED_FILTERS = ["Following", "Movies", "Group"];
+// feed
+import { getFeedPage } from "../Data/selector-feed";
+import TakePreviewCard from "../Component/Cards/TakePreviewCard";
+import ReviewPreviewCard from "../Component/Cards/ReviewPreviewCard";
+import TakesFilterTabs from "../Component/UI/TakesFilterTab";
 
-function PillGroup({ options, value, onChange, className = "" }) {
-  return (
-    <div
-      className={[
-        "inline-flex w-full items-center justify-between rounded-full border border-white/15 bg-white/10 p-1 backdrop-blur",
-        className,
-      ].join(" ")}
-    >
-      {options.map((opt) => {
-        const active = opt === value;
-        return (
-          <button
-            key={opt}
-            type="button"
-            onClick={() => onChange(opt)}
-            className={[
-              "flex-1 rounded-full px-4 py-2 text-sm font-semibold transition",
-              "active:scale-[0.99]",
-              active
-                ? "bg-cyan-200/95 text-slate-900 shadow"
-                : "text-white/70 hover:text-white",
-            ].join(" ")}
-          >
-            {opt}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
+const PAGE_SIZE = 10;
 
 export default function TrendsHome() {
   const location = useLocation();
 
   const [query, setQuery] = useState("");
 
-  // NEW: trending states (normalized keys)
+  // trending states
   const [period, setPeriod] = useState("today"); // today | week | month
   const [mode, setMode] = useState("movies"); // movies | takes | reviews
 
-  // feed pills (keep your old feed section)
-  const [feedFilter, setFeedFilter] = useState("Movies");
+  // feed tabs (IMPORTANT: these are ids used by selector-feed.js)
+  // must be: "following" | "movies" | "group"
+  const [feedTab, setFeedTab] = useState("movies");
 
-  const items = useMemo(() => {
+  // infinite feed state
+  const [feedItems, setFeedItems] = useState([]);
+  const [cursor, setCursor] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const sentinelRef = useRef(null);
+
+  const trendingItems = useMemo(() => {
     return getTrendingList({ period, mode, limit: 7 });
   }, [period, mode]);
 
@@ -66,6 +48,46 @@ export default function TrendsHome() {
     const idx = order.indexOf(period);
     setPeriod(order[(idx + 1) % order.length]);
   };
+
+  // first page on tab change
+  useEffect(() => {
+    const first = getFeedPage({ tab: feedTab, cursor: 0, limit: PAGE_SIZE });
+    setFeedItems(first.items);
+    setCursor(first.nextCursor);
+    setHasMore(first.hasMore);
+  }, [feedTab]);
+
+  // infinite scroll
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0]?.isIntersecting) return;
+
+      const next = getFeedPage({ tab: feedTab, cursor, limit: PAGE_SIZE });
+      setFeedItems((prev) => [...prev, ...next.items]);
+      setCursor(next.nextCursor);
+      setHasMore(next.hasMore);
+    });
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, [feedTab, cursor, hasMore]);
+
+  // refresh after posting (MakeATake dispatches mtix:feed-updated)
+  useEffect(() => {
+    const onUpdate = () => {
+      const first = getFeedPage({ tab: feedTab, cursor: 0, limit: PAGE_SIZE });
+      setFeedItems(first.items);
+      setCursor(first.nextCursor);
+      setHasMore(first.hasMore);
+    };
+
+    window.addEventListener("mtix:feed-updated", onUpdate);
+    return () => window.removeEventListener("mtix:feed-updated", onUpdate);
+  }, [feedTab]);
 
   return (
     <main className="min-h-dvh bg-[linear-gradient(-25deg,#000000,#134e4a)] text-white">
@@ -93,38 +115,32 @@ export default function TrendsHome() {
           <FilterSwitch value={mode} onChange={setMode} />
         </div>
 
-        {/* Trending list (dropdown inside component) */}
-        <TrendingRank key={`${period}-${mode}`} items={items} />
+        {/* Trending list */}
+        <TrendingRank key={`${period}-${mode}`} items={trendingItems} />
 
-        {/* Feed pills */}
+        {/* Feed filter tabs (Following / Movies / Group) */}
         <div className="mt-5">
-          <PillGroup
-            options={FEED_FILTERS}
-            value={feedFilter}
-            onChange={setFeedFilter}
-          />
+          <TakesFilterTabs value={feedTab} onChange={setFeedTab} />
         </div>
 
-        {/* Dummy feed */}
+        {/* REAL feed */}
         <div className="mt-4 space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="rounded-3xl border border-white/10 bg-black/20 p-4 backdrop-blur"
-            >
-              <div className="flex items-center justify-between">
-                <div className="text-sm font-semibold">
-                  @{feedFilter.toLowerCase()}_demo_{i}
-                </div>
-                <div className="text-xs text-white/55">just now</div>
-              </div>
-              <div className="mt-2 text-sm text-white/70">
-                Dummy {feedFilter} content (scroll feed later). This is just
-                route + layout visual.
-              </div>
-            </div>
-          ))}
+          {feedItems.map((it) =>
+            it.kind === "take" ? (
+              <TakePreviewCard key={it.id} item={it} />
+            ) : (
+              <ReviewPreviewCard key={it.id} item={it} />
+            )
+          )}
         </div>
+
+        {/* sentinel */}
+        {hasMore && <div ref={sentinelRef} className="h-10" />}
+        {!hasMore && (
+          <div className="py-6 text-center text-white/40 text-sm">
+            end of feed
+          </div>
+        )}
       </div>
 
       <Navbar

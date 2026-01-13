@@ -6,10 +6,10 @@ export default function AppFrame({ children }) {
           "mx-auto min-h-dvh w-full",
           "bg-app", // ✅ was bg-white
           "overflow-hidden", // ✅ prevents peeking on rounded corners
-          "max-w-[430px]",
+          "max-w-107.5",
           "md:my-6 md:min-h-[calc(100dvh-3rem)]",
           "md:rounded-[28px] md:border md:border-neutral-200 md:shadow-sm",
-          "md:max-w-[820px] lg:max-w-[1024px]",
+          "md:max-w-205 lg:max-w-5xl",
         ].join(" ")}
       >
         {children}

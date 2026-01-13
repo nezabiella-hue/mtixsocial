@@ -7,7 +7,7 @@ const OPTIONS = [
 
 export default function FilterSwitch({ value, onChange }) {
   return (
-    <div className="mx-auto flex max-w-[520px] gap-2 rounded-full border border-white/15 bg-white/5 p-1">
+    <div className="mx-auto flex max-w-130 gap-2 rounded-full border border-white/15 bg-white/5 p-1">
       {OPTIONS.map((opt) => {
         const active = opt.value === value;
         return (
